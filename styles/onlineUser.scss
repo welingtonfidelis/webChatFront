@@ -10,7 +10,7 @@
 
 .online-user-icon{
     margin-right: 5px;
-    font-size: 2rem;
+    font-size: 1.8rem !important;
 }
 
 .online-user-icon-new {
@@ -26,7 +26,11 @@
 }
 
 #online-user-content span {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 23vw;
 }
 
 #online-user-content:hover {

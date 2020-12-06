@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 
 const INITIAL_STATE = {
-    name: '',
+    name: ``,
     socketId: '',
     onlineUsers: {}
 };

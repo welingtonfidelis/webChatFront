@@ -11,8 +11,10 @@ import Input from '../../components/Input';
 import Button from '../../components/ButtonPrimary';
 
 let socket = null;
+let receiverControl = null;
+
 export default function Chat() {
-    const [receiver, setReceiver] = useState({ user: '', socketId: 0 });
+    const [receiver, setReceiver] = useState({});
     const [message, setMessage] = useState('');
 
     const apiUrl = process.env.API_URL;
@@ -64,6 +66,12 @@ export default function Chat() {
                     type: 'RM_ONLINE_USER',
                     user: data
                 });
+
+                if(data === receiverControl?.socketId) {
+                    alert(`O usuário ${receiverControl.user} saiu do chat.`);
+                    setReceiver({});
+                    receiverControl = null;
+                }
             });
         }
         else {
@@ -109,7 +117,8 @@ export default function Chat() {
             user: user.socketId
         });
 
-        setReceiver({ ...user });
+        receiverControl = user;
+        setReceiver(user);
     }
     return (
         <div id="chat-content">
@@ -156,7 +165,7 @@ export default function Chat() {
 
                     <form
                         onSubmit={sendMessage}
-                        className={`chat-input-content ${receiver.socketId !== 0 ? '' : 'disable-div'}`}
+                        className={`chat-input-content ${receiver.socketId ? '' : 'disable-div'}`}
                     >
                         <Input
                             value={message}
