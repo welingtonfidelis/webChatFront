@@ -1,0 +1,17 @@
+.input-block {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-block span {
+    font-size: 1.0rem;
+    margin-top: 8px;
+}
+
+.input-block input{
+    border: 1px solid #0094A8;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    padding: 6px 5px;
+}

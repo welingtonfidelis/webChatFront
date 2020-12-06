@@ -1,0 +1,42 @@
+.button-primary-block, .button-secondary-block {
+    background: #0094A8;
+    border: 1px solid #0094A8;
+    border-radius: 4px;
+    padding: 5px;
+    width: 100%;
+    margin-top: 5px;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 1.3rem;
+    transition: .5s;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-secondary-block {
+    background: #717171 ;
+    border: 1px solid #717171;
+}
+
+.button-primary-block:hover {
+    background: #006472;
+    cursor: pointer;
+}
+
+.button-secondary-block:hover {
+    background: #464646;
+    cursor: pointer;
+}
+
+.button-primary-block b {
+    flex: 1;
+}
+
+.button-primary-block .MuiCircularProgress-root, 
+.button-secondary-block .MuiCircularProgress-root {
+    width: 20px !important;
+    height: 20px !important;
+    color: #fff !important;
+}

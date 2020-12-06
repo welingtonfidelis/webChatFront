@@ -1,0 +1,18 @@
+#menu-content {
+    width: 100vw;
+    background: #293749;
+    padding: 8px;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .9rem;
+    max-height: 42px;
+}
+
+#menu-content svg:hover {
+    transition: .7s;
+    cursor: pointer;
+    color: #0094A8;
+}

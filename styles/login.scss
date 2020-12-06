@@ -1,0 +1,30 @@
+.login-content {
+    border: 1px solid #0094A8;
+    border-radius: 4px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    max-width: 85vw;
+}
+
+.login-user-icon svg{
+    font-size: 8rem !important;
+    color: #293749 !important;
+}
+
+.login-welcome-text {
+    font-size: 1.2rem;
+    max-width: 65%;
+    text-align: center;
+    margin: 15px 0;
+}
+
+.login-content-input {
+    width: 75%;
+}
+
+.login-user-input {
+    margin-bottom: 30px;
+}
