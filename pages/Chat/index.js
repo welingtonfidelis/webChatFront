@@ -5,22 +5,26 @@ import { Send } from '@material-ui/icons';
 import { useRouter } from 'next/router';
 
 import Menu from '../../components/Menu';
-import OnlineUser from '../../components/OnlineUser';
+import OnlineUser from '../../components/OnlineUserItem';
+import ActiveRoomItem from '../../components/ActiveRoomItem';
 import Message from '../../components/Message';
 import Input from '../../components/Input';
 import Button from '../../components/ButtonPrimary';
+import Tabs from '../../components/Tabs';
 
 let socket = null;
 let receiverControl = null;
+let roomControl = {};
 
 export default function Chat() {
     const [receiver, setReceiver] = useState({});
+    const [room, setRoom] = useState('');
     const [message, setMessage] = useState('');
 
     const apiUrl = process.env.API_URL;
     const dispatch = useDispatch();
     const router = useRouter();
-    const { name, onlineUsers } = useSelector(state => state);
+    const { name, socketId, onlineUsers, activeRooms } = useSelector(state => state);
 
     useEffect(() => {
         if (name !== '') {
@@ -37,7 +41,7 @@ export default function Chat() {
 
             socket.on('receiveMessage', data => {
                 dispatch({
-                    type: 'ADD_CONVERSATION_MESSAGE',
+                    type: 'ADD_USER_MESSAGE',
                     message: data
                 });
 
@@ -47,9 +51,29 @@ export default function Chat() {
                 });
             });
 
+            socket.on('receiveMessageFromRoom', data => {
+                dispatch({
+                    type: 'ADD_ROOM_MESSAGE',
+                    message: data
+                });
+
+                dispatch({
+                    type: 'ADD_ROOM_ALERT_NEW_MESSAGE',
+                    room: data.room
+                });
+            });
+
             socket.on('receiveListOnlineUsers', data => {
+                console.log('lista usuarios', data);
                 dispatch({
                     type: 'CREATE_ONLINE_USER_LIST',
+                    list: data
+                });
+            });
+
+            socket.on('receiveListRooms', data => {
+                dispatch({
+                    type: 'CREATE_ACTIVE_ROOMS_LIST',
                     list: data
                 });
             });
@@ -61,13 +85,27 @@ export default function Chat() {
                 });
             });
 
+            socket.on('newUserInRoom', data => {
+                dispatch({
+                    type: 'ADD_USER_ROOM',
+                    room: data.room
+                });
+            });
+
+            socket.on('removeUserRoom', data => {
+                dispatch({
+                    type: 'RM_USER_ROOM',
+                    room: data.room
+                });
+            });
+
             socket.on('removeOnlineUser', data => {
                 dispatch({
                     type: 'RM_ONLINE_USER',
                     user: data
                 });
 
-                if(data === receiverControl?.socketId) {
+                if (data === receiverControl?.socketId) {
                     alert(`O usuário ${receiverControl.user} saiu do chat.`);
                     setReceiver({});
                     receiverControl = null;
@@ -80,6 +118,38 @@ export default function Chat() {
         }
     }, []);
 
+    const sendMessageRoom = (e) => {
+        e.preventDefault();
+        const date = new Date();
+
+        if (socket) {
+            socket.emit(
+                'sendMessageToRoom',
+                { room, message: { user: name, text: message, date, receive: true } }
+            );
+
+            dispatch({
+                type: 'ADD_ROOM_MESSAGE',
+                message: {
+                    room,
+                    message: {
+                        user: name,
+                        date,
+                        text: message,
+                        socketId
+                    }
+                }
+            });
+
+            dispatch({
+                type: 'RM_ROOM_ALERT_NEW_MESSAGE',
+                room
+            });
+
+            setMessage('');
+        }
+    }
+
     const sendMessage = (e) => {
         e.preventDefault();
         const date = new Date();
@@ -87,17 +157,17 @@ export default function Chat() {
         if (socket) {
             socket.emit(
                 'sendMessage',
-                { receiver: receiver.socketId, message: { user: name, text: message, date, receive: true } }
+                { receiver: receiver.socketId, message: { text: message, date } }
             );
 
             dispatch({
-                type: 'ADD_CONVERSATION_MESSAGE',
+                type: 'ADD_USER_MESSAGE',
                 message: {
                     sender: receiver.socketId,
                     message: {
                         date,
                         text: message,
-                        receive: false
+                        socketId
                     }
                 }
             });
@@ -106,12 +176,28 @@ export default function Chat() {
                 type: 'RM_ALERT_NEW_MESSAGE',
                 user: receiver.socketId
             });
+            setMessage('');
         }
+    }
 
-        setMessage('');
+    const joinRomm = (room) => {
+        setRoom(room);
+
+        dispatch({
+            type: 'RM_ROOM_ALERT_NEW_MESSAGE',
+            room
+        });
+
+        if (socket && !roomControl[room]) {
+            roomControl[room] = true;
+
+            socket.emit('joinRoom', { room, user: name });
+        }
     }
 
     const openConversation = (user) => {
+        setRoom('');
+
         dispatch({
             type: 'RM_ALERT_NEW_MESSAGE',
             user: user.socketId
@@ -120,52 +206,96 @@ export default function Chat() {
         receiverControl = user;
         setReceiver(user);
     }
+
+    const OnlineUsers = () => (
+        Object.entries(onlineUsers).map(item => {
+            const [socketId, user] = item;
+
+            return (
+                <div
+                    key={socketId}
+                    onClick={() => openConversation(user)}
+                >
+                    <OnlineUser item={user} />
+                </div>
+            )
+        })
+    );
+
+    const ActiveRooms = () => (
+        Object.entries(activeRooms).map((item, index) => {
+            const [name] = item;
+
+            return (
+                <div
+                    key={index}
+                    onClick={() => joinRomm(name)}
+                >
+                    <ActiveRoomItem item={item} />
+                </div>
+            )
+        })
+    );
+
     return (
         <div id="chat-content">
-            <Menu socket={socket}/>
+            <Menu socket={socket} />
 
             <div className="chat-container">
                 <div className="left-card">
                     <strong>Usuários online</strong>
 
                     <div className="left-card-container">
-                        {
-                            Object.entries(onlineUsers).map(item => {
-                                const [socketId, user] = item;
-
-                                return (
-                                    <div
-                                        key={socketId}
-                                        onClick={() => openConversation(user)}
-                                    >
-                                        <OnlineUser item={user} />
-                                    </div>
-                                )
-                            })
-                        }
+                        <Tabs items={[
+                            {
+                                label: 'Usuários',
+                                content: <OnlineUsers />
+                            },
+                            {
+                                label: 'Salas',
+                                content: <ActiveRooms />
+                            }
+                        ]} />
                     </div>
                 </div>
 
                 <div className="right-card">
-                    <strong>Conversa com {receiver.user}</strong>
+                    <strong>{
+                        room !== ''
+                            ? `Sala ${room}`
+                            : `${receiver.user || '.'}`
+                    }</strong>
 
                     <div className="right-card-container">
                         {
-                            (
-                                onlineUsers[receiver.socketId]
-                                    ? onlineUsers[receiver.socketId].message
-                                    : []
-                            ).map((item, index) => {
-                                return (
-                                    <Message item={item} key={index} />
-                                )
-                            })
+                            room !== ''
+                                ? (
+                                    activeRooms[room]
+                                        ? activeRooms[room].message
+                                        : []
+                                ).map((item, index) => {
+                                    return (
+                                        <Message item={item} socketId={socketId} key={index} />
+                                    )
+                                })
+
+                                : (
+                                    onlineUsers[receiver.socketId]
+                                        ? onlineUsers[receiver.socketId].message
+                                        : []
+                                ).map((item, index) => {
+                                    return (
+                                        <Message item={item} socketId={socketId} key={index} />
+                                    )
+                                })
                         }
                     </div>
 
                     <form
-                        onSubmit={sendMessage}
-                        className={`chat-input-content ${receiver.socketId ? '' : 'disable-div'}`}
+                        onSubmit={room !== '' ? sendMessageRoom : sendMessage}
+                        className={
+                            `chat-input-content ${(receiver.socketId || room !== '') ? '' : 'disable-div'}`
+                        }
                     >
                         <Input
                             value={message}

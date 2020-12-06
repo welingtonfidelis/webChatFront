@@ -34,6 +34,12 @@
     align-items: center;
 }
 
+.message-user-name {
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid;
+}
+
 @media (max-width: 600px) {
     .chat-input-content .input-block {
         width: 51vw !important;

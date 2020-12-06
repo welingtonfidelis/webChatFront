@@ -8,6 +8,8 @@ import '../styles/menu.scss'
 import '../styles/chat.scss'
 import '../styles/onlineUser.scss'
 import '../styles/message.scss'
+import '../styles/tabs.scss'
+import '../styles/activeRoom.scss'
 
 import store from '../store';
 

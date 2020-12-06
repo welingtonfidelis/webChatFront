@@ -1,9 +1,10 @@
 import { createStore } from 'redux';
 
 const INITIAL_STATE = {
-    name: ``,
+    name: `user ${Math.floor(Math.random() * 100)}`,
     socketId: '',
-    onlineUsers: {}
+    onlineUsers: {},
+    activeRooms: {}
 };
 
 function user(state = INITIAL_STATE, action) {
@@ -24,6 +25,12 @@ function user(state = INITIAL_STATE, action) {
                 onlineUsers: action.list
             }
 
+        case 'CREATE_ACTIVE_ROOMS_LIST':
+            return {
+                ...state,
+                activeRooms: action.list
+            }
+
         case 'ADD_ONLINE_USER':
             return {
                 ...state,
@@ -39,9 +46,33 @@ function user(state = INITIAL_STATE, action) {
                 onlineUsers: onlineUserTmp
             }
 
-        case 'ADD_CONVERSATION_MESSAGE':
+        case 'ADD_USER_ROOM':
+            return {
+                ...state,
+                activeRooms: { 
+                    ...state.activeRooms,
+                    [action.room]: {
+                        ...state.activeRooms[action.room],
+                        total: state.activeRooms[action.room].total +1
+                    }
+                }
+            }
+
+        case 'RM_USER_ROOM':
+            return {
+                ...state,
+                activeRooms: { 
+                    ...state.activeRooms,
+                    [action.room]: {
+                        ...state.activeRooms[action.room],
+                        total: state.activeRooms[action.room].total -1
+                    }
+                }
+            }
+
+        case 'ADD_USER_MESSAGE':
             const { message, sender } = action.message;
-          
+
             if (state.onlineUsers[sender]) {
                 return {
                     ...state,
@@ -68,6 +99,33 @@ function user(state = INITIAL_STATE, action) {
                 }
             }
 
+        case 'ADD_ROOM_MESSAGE':
+            const { message: msgFromRoom, room } = action.message;
+
+            if (state.activeRooms[room]) {
+                return {
+                    ...state,
+                    activeRooms: {
+                        ...state.activeRooms,
+                        [room]: {
+                            ...state.activeRooms[room],
+                            message: [...state.activeRooms[room].message, msgFromRoom]
+                        }
+                    }
+                }
+            }
+            else {
+                return {
+                    ...state,
+                    activeRooms: {
+                        ...state.activeRooms,
+                        [room]: {
+                            message: [message]
+                        }
+                    }
+                }
+            }
+
         case 'ADD_ALERT_NEW_MESSAGE':
             return {
                 ...state,
@@ -87,6 +145,30 @@ function user(state = INITIAL_STATE, action) {
                     ...state.onlineUsers,
                     [action.user]: {
                         ...state.onlineUsers[action.user],
+                        newMessage: false
+                    }
+                }
+            }
+
+        case 'ADD_ROOM_ALERT_NEW_MESSAGE':
+            return {
+                ...state,
+                activeRooms: {
+                    ...state.activeRooms,
+                    [action.room]: {
+                        ...state.activeRooms[action.room],
+                        newMessage: true
+                    }
+                }
+            }
+
+        case 'RM_ROOM_ALERT_NEW_MESSAGE':
+            return {
+                ...state,
+                activeRooms: {
+                    ...state.activeRooms,
+                    [action.room]: {
+                        ...state.activeRooms[action.room],
                         newMessage: false
                     }
                 }
