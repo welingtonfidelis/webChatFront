@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 
 const INITIAL_STATE = {
-    name: `user ${Math.floor(Math.random() * 100)}`,
+    name: ``,
     socketId: '',
     onlineUsers: {},
     activeRooms: {}
