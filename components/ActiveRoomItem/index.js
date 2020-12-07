@@ -2,7 +2,6 @@ import { Forum } from '@material-ui/icons';
 
 export default function OnlineUserItem({ item }) {
     const [name, message] = item;
-    console.log(item);
 
     return (
         <div id="active-room-content">

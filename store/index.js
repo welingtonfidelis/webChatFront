@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 
 const INITIAL_STATE = {
-    name: `user ${Math.floor(Math.random() * 100)}`,
+    name: ``,
     socketId: '',
     onlineUsers: {},
     activeRooms: {}
@@ -16,7 +16,7 @@ function user(state = INITIAL_STATE, action) {
 
         case 'CLEAR_USER':
             return {
-                name: '', socketId: '', onlineUsers: {}
+                name: '', socketId: '', onlineUsers: {}, activeRooms: {}
             }
 
         case 'CREATE_ONLINE_USER_LIST':
@@ -46,14 +46,31 @@ function user(state = INITIAL_STATE, action) {
                 onlineUsers: onlineUserTmp
             }
 
+        case 'ADD_NEW_ROOM':
+            const newActiveRoomsTmp = Object.assign(state.activeRooms, action.room);
+
+            return {
+                ...state,
+                activeRooms: newActiveRoomsTmp
+            }
+
+        case 'RM_ROOM':
+            const rmActiveRoomsTmp = state.activeRooms;
+            delete rmActiveRoomsTmp[action.room]
+
+            return {
+                ...state,
+                activeRooms: rmActiveRoomsTmp
+            }
+            
         case 'ADD_USER_ROOM':
             return {
                 ...state,
-                activeRooms: { 
+                activeRooms: {
                     ...state.activeRooms,
                     [action.room]: {
                         ...state.activeRooms[action.room],
-                        total: state.activeRooms[action.room].total +1
+                        total: state.activeRooms[action.room].total + 1
                     }
                 }
             }
@@ -61,11 +78,11 @@ function user(state = INITIAL_STATE, action) {
         case 'RM_USER_ROOM':
             return {
                 ...state,
-                activeRooms: { 
+                activeRooms: {
                     ...state.activeRooms,
                     [action.room]: {
                         ...state.activeRooms[action.room],
-                        total: state.activeRooms[action.room].total -1
+                        total: state.activeRooms[action.room].total - 1
                     }
                 }
             }

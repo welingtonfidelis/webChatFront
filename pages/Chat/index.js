@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
-import { Send } from '@material-ui/icons';
+import { Send, Add } from '@material-ui/icons';
 import { useRouter } from 'next/router';
 
 import Menu from '../../components/Menu';
@@ -20,6 +20,7 @@ export default function Chat() {
     const [receiver, setReceiver] = useState({});
     const [room, setRoom] = useState('');
     const [message, setMessage] = useState('');
+    const [newRoom, setNewRoom] = useState('');
 
     const apiUrl = process.env.API_URL;
     const dispatch = useDispatch();
@@ -64,7 +65,6 @@ export default function Chat() {
             });
 
             socket.on('receiveListOnlineUsers', data => {
-                console.log('lista usuarios', data);
                 dispatch({
                     type: 'CREATE_ONLINE_USER_LIST',
                     list: data
@@ -75,6 +75,20 @@ export default function Chat() {
                 dispatch({
                     type: 'CREATE_ACTIVE_ROOMS_LIST',
                     list: data
+                });
+            });
+
+            socket.on('receiveNewRoom', data => {
+                dispatch({
+                    type: 'ADD_NEW_ROOM',
+                    room: data
+                });
+            });
+
+            socket.on('removeRoom', data => {
+                dispatch({
+                    type: 'RM_ROOM',
+                    room: data.room
                 });
             });
 
@@ -207,6 +221,14 @@ export default function Chat() {
         setReceiver(user);
     }
 
+    const handleNewRoom = (e) => {
+        e.preventDefault();
+
+        if(socket) socket.emit('newRoom', { room: newRoom });
+
+        setNewRoom('');
+    }
+
     const OnlineUsers = () => (
         Object.entries(onlineUsers).map(item => {
             const [socketId, user] = item;
@@ -253,7 +275,24 @@ export default function Chat() {
                             },
                             {
                                 label: 'Salas',
-                                content: <ActiveRooms />
+                                content: <>
+                                    <form onSubmit={handleNewRoom} className="chat-new-room-content">
+                                        <strong>Criar sala</strong>
+
+                                        <div className="chat-new-room-container">
+                                            <Input
+                                                // label="Nome" 
+                                                value={newRoom}
+                                                onChange={e => setNewRoom(e.target.value)}
+                                                required
+                                            />
+
+                                            <Button label={<Add />} />
+                                        </div>
+                                    </form>
+
+                                    <ActiveRooms />
+                                </>
                             }
                         ]} />
                     </div>
