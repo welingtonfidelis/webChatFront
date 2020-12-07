@@ -84,3 +84,17 @@
         margin-right: 0 !important;
     }
 }
+
+.right-card-exit-room {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.right-card-exit-room svg {
+    color: #1994a8;
+}
+
+.right-card-exit-room svg:hover {
+    cursor: pointer;
+}

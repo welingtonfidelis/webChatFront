@@ -22,3 +22,12 @@
     cursor: pointer;
     filter: brightness(.7);
 }
+
+.active-room-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.active-room-info svg {
+    width: 1.1rem;
+}

@@ -1,7 +1,7 @@
 import { createStore } from 'redux';
 
 const INITIAL_STATE = {
-    name: ``,
+    name: `user ${Math.floor(Math.random() * 100)}`,
     socketId: '',
     onlineUsers: {},
     activeRooms: {}
@@ -187,6 +187,34 @@ function user(state = INITIAL_STATE, action) {
                     [action.room]: {
                         ...state.activeRooms[action.room],
                         newMessage: false
+                    }
+                }
+            }
+
+        case 'ADD_IN_ROOM':
+            if(!state.activeRooms[action.room].in) {
+                return {
+                    ...state,
+                    activeRooms: {
+                        ...state.activeRooms,
+                        [action.room]: {
+                            ...state.activeRooms[action.room],
+                            in: true
+                        }
+                    }
+                }
+            }
+            else return state;
+
+        case 'EXIT_ROOM':
+            return {
+                ...state,
+                activeRooms: {
+                    ...state.activeRooms,
+                    [action.room]: {
+                        ...state.activeRooms[action.room],
+                        message: [],
+                        in: false
                     }
                 }
             }

@@ -24,7 +24,7 @@ export default function Menu({socket}) {
                 <strong>{store.name || 'sem usuario'}</strong>
             </div>
 
-            <div onClick={handleExit}>
+            <div onClick={handleExit} title="Sair do chat">
                 <ExitToApp />
             </div>
         </nav>

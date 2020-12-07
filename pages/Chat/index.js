@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
-import { Send, Add } from '@material-ui/icons';
+import { Send, Add, Cancel } from '@material-ui/icons';
 import { useRouter } from 'next/router';
 
 import Menu from '../../components/Menu';
@@ -202,10 +202,30 @@ export default function Chat() {
             room
         });
 
+        dispatch({
+            type: 'ADD_IN_ROOM',
+            room
+        });
+
         if (socket && !roomControl[room]) {
             roomControl[room] = true;
 
             socket.emit('joinRoom', { room, user: name });
+        }
+    }
+
+    const exitRoom = () => {
+        if (socket) {
+            roomControl[room] = false;
+
+            socket.emit('exitRoom', { room, user: name });
+
+            dispatch({
+                type: 'EXIT_ROOM',
+                room
+            });
+
+            setRoom('');
         }
     }
 
@@ -224,7 +244,11 @@ export default function Chat() {
     const handleNewRoom = (e) => {
         e.preventDefault();
 
-        if(socket) socket.emit('newRoom', { room: newRoom });
+        if (socket) {
+            socket.emit('newRoom', { room: newRoom });
+            socket.emit('joinRoom', { room: newRoom, user: name });
+            roomControl[newRoom] = true;
+        }
 
         setNewRoom('');
     }
@@ -281,7 +305,6 @@ export default function Chat() {
 
                                         <div className="chat-new-room-container">
                                             <Input
-                                                // label="Nome" 
                                                 value={newRoom}
                                                 onChange={e => setNewRoom(e.target.value)}
                                                 required
@@ -308,15 +331,24 @@ export default function Chat() {
                     <div className="right-card-container">
                         {
                             room !== ''
-                                ? (
-                                    activeRooms[room]
-                                        ? activeRooms[room].message
-                                        : []
-                                ).map((item, index) => {
-                                    return (
-                                        <Message item={item} socketId={socketId} key={index} />
-                                    )
-                                })
+                                ?
+                                <>
+                                    <div className="right-card-exit-room">
+                                        <span title="Sair da sala">
+                                            <Cancel onClick={exitRoom} />
+                                        </span>
+                                    </div>
+
+                                    {(
+                                        activeRooms[room]
+                                            ? activeRooms[room].message
+                                            : []
+                                    ).map((item, index) => {
+                                        return (
+                                            <Message item={item} socketId={socketId} key={index} />
+                                        )
+                                    })}
+                                </>
 
                                 : (
                                     onlineUsers[receiver.socketId]
